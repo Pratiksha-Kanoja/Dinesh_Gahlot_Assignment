@@ -1,5 +1,5 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
-import { dirname, extname, join, normalize, sep } from "node:path";
+import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   createTask,
@@ -11,13 +11,28 @@ import {
   updateTask
 } from "./queries.js";
 
-const clientDistPath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "..",
-  "client",
-  "dist"
-);
+const moduleDir = dirname(fileURLToPath(import.meta.url));
+
+function findClientDistPath() {
+  const candidates = [
+    join(moduleDir, "..", "..", "client", "dist"),
+    join(process.cwd(), "client", "dist"),
+    join(process.cwd(), "..", "client", "dist"),
+    join(moduleDir, "..", "..", "..", "client", "dist")
+  ];
+
+  return candidates.map((path) => resolve(path)).find((path) => existsSync(path)) || null;
+}
+
+const clientDistPath = findClientDistPath();
+
+if (clientDistPath) {
+  console.info(`Serving frontend from ${clientDistPath}`);
+} else {
+  console.warn(
+    "Frontend build not found (client/dist). API routes will work, but / will 404 until the client is built."
+  );
+}
 
 const MIME_TYPES = {
   ".css": "text/css; charset=utf-8",
@@ -37,9 +52,15 @@ function sendJson(response, statusCode, payload) {
 }
 
 function resolveStaticPath(pathname) {
-  const requestedPath = pathname === "/" ? "/index.html" : pathname;
-  const normalized = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
-  const filePath = join(clientDistPath, normalized);
+  if (!clientDistPath) {
+    return null;
+  }
+
+  const relativePath =
+    pathname === "/"
+      ? "index.html"
+      : normalize(pathname.replace(/^[/\\]+/, "")).replace(/^(\.\.[/\\])+/, "");
+  const filePath = resolve(clientDistPath, relativePath);
 
   if (!filePath.startsWith(`${clientDistPath}${sep}`) && filePath !== clientDistPath) {
     return null;
@@ -58,10 +79,6 @@ function resolveStaticPath(pathname) {
 }
 
 function tryServeStatic(pathname, response) {
-  if (!existsSync(clientDistPath)) {
-    return false;
-  }
-
   const filePath = resolveStaticPath(pathname);
   if (!filePath) {
     return false;
@@ -120,7 +137,12 @@ export function createApp(db) {
       const { pathname, searchParams } = url;
 
       if (request.method === "GET" && pathname === "/api/health") {
-        sendJson(response, 200, { data: { status: "ok" } });
+        sendJson(response, 200, {
+          data: {
+            status: "ok",
+            frontend: Boolean(clientDistPath)
+          }
+        });
         return;
       }
 
