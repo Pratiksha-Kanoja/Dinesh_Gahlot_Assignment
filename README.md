@@ -49,9 +49,11 @@ The database file is created automatically at `server/data/taskflow.sqlite` and 
 Create a **Web Service** from this repo and use:
 
 - **Root Directory:** leave empty
-- **Build Command:** `npm install && npm run build`
+- **Build Command:** `NPM_CONFIG_PRODUCTION=false npm install && npm run build`
 - **Start Command:** `npm start`
-- **Environment variable:** `NODE_VERSION` = `24`
+- **Environment variables:**
+  - `NODE_VERSION` = `24`
+  - `NPM_CONFIG_PRODUCTION` = `false`
 
 The server serves the API and the built React app from one URL. SQLite data on the free tier can reset when the service restarts or redeploys.
 
