@@ -1,0 +1,22 @@
+{
+  "name": "taskflow-assignment",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TaskFlow full-stack take-home assignment.",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:client": "npm --workspace client run dev",
+    "dev:server": "npm --workspace server run dev",
+    "build": "npm --workspace client run build",
+    "test": "npm --workspace server test",
+    "seed": "npm --workspace server run seed"
+  }
+}
