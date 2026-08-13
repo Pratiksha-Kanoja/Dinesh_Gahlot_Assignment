@@ -141,4 +141,8 @@ The backend tests cover:
 
 ## Time spent
 
-Initial implementation pass: roughly 1 to 2 hours. Update this note before final submission if you continue polishing the project.
+About 2 hours for the core implementation, plus a short polish pass for form validation and README write-up.
+
+## What I learned
+
+I used Node's built-in `node:sqlite` module instead of a separate native driver. That made local setup simpler from a clean clone, while still writing real SQL for schema, joins, and aggregate queries rather than filtering everything in application memory.

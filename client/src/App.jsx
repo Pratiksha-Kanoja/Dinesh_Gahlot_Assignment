@@ -59,6 +59,11 @@ function App() {
 
   async function handleCreateTask(event) {
     event.preventDefault();
+    if (!form.title.trim()) {
+      setError("Task title is required.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       await api.createTask({
@@ -69,6 +74,7 @@ function App() {
         ...emptyTask,
         columnId: form.columnId
       });
+      setError("");
       await loadBoard();
     } catch (err) {
       setError(err.message);
@@ -79,10 +85,16 @@ function App() {
 
   async function handleUpdateTask(event) {
     event.preventDefault();
+    if (!editDraft.title.trim()) {
+      setError("Task title is required.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       await api.updateTask(editingTaskId, editDraft);
       setEditingTaskId(null);
+      setError("");
       await loadBoard();
     } catch (err) {
       setError(err.message);
@@ -177,6 +189,7 @@ function App() {
                 setForm((current) => ({ ...current, title: event.target.value }))
               }
               placeholder="Write the next task"
+              required
             />
           </label>
           <label>
@@ -231,7 +244,7 @@ function App() {
               </select>
             </label>
           </div>
-          <button type="submit" disabled={isSaving}>
+          <button type="submit" disabled={isSaving || !form.title.trim()}>
             {isSaving ? "Saving..." : "Add task"}
           </button>
         </form>
@@ -266,6 +279,7 @@ function App() {
                                   title: event.target.value
                                 }))
                               }
+                              required
                             />
                           </label>
                           <label>
@@ -300,7 +314,10 @@ function App() {
                             </select>
                           </label>
                           <div className="actions">
-                            <button type="submit" disabled={isSaving}>
+                            <button
+                              type="submit"
+                              disabled={isSaving || !editDraft.title.trim()}
+                            >
                               Save
                             </button>
                             <button
