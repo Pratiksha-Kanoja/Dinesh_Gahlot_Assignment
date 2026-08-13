@@ -44,6 +44,17 @@ http://127.0.0.1:4000
 
 The database file is created automatically at `server/data/taskflow.sqlite` and is seeded on first run.
 
+## Deploy on Render (optional)
+
+Create a **Web Service** from this repo and use:
+
+- **Root Directory:** leave empty
+- **Build Command:** `npm install && npm run build`
+- **Start Command:** `npm start`
+- **Environment variable:** `NODE_VERSION` = `24`
+
+The server serves the API and the built React app from one URL. SQLite data on the free tier can reset when the service restarts or redeploys.
+
 ## Useful commands
 
 Run backend tests:

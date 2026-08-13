@@ -1,3 +1,6 @@
+import { createReadStream, existsSync, statSync } from "node:fs";
+import { dirname, extname, join, normalize, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   createTask,
   deleteTask,
@@ -8,9 +11,67 @@ import {
   updateTask
 } from "./queries.js";
 
+const clientDistPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "..",
+  "client",
+  "dist"
+);
+
+const MIME_TYPES = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2"
+};
+
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, { "Content-Type": "application/json" });
   response.end(JSON.stringify(payload));
+}
+
+function resolveStaticPath(pathname) {
+  const requestedPath = pathname === "/" ? "/index.html" : pathname;
+  const normalized = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
+  const filePath = join(clientDistPath, normalized);
+
+  if (!filePath.startsWith(`${clientDistPath}${sep}`) && filePath !== clientDistPath) {
+    return null;
+  }
+
+  if (existsSync(filePath) && statSync(filePath).isFile()) {
+    return filePath;
+  }
+
+  const indexPath = join(clientDistPath, "index.html");
+  if (existsSync(indexPath)) {
+    return indexPath;
+  }
+
+  return null;
+}
+
+function tryServeStatic(pathname, response) {
+  if (!existsSync(clientDistPath)) {
+    return false;
+  }
+
+  const filePath = resolveStaticPath(pathname);
+  if (!filePath) {
+    return false;
+  }
+
+  response.writeHead(200, {
+    "Content-Type": MIME_TYPES[extname(filePath)] || "application/octet-stream"
+  });
+  createReadStream(filePath).pipe(response);
+  return true;
 }
 
 function setCorsHeaders(response) {
@@ -110,6 +171,10 @@ export function createApp(db) {
       if (request.method === "PATCH" && moveTaskId) {
         const task = moveTask(db, moveTaskId, await readJson(request));
         sendJson(response, 200, { data: { task } });
+        return;
+      }
+
+      if (request.method === "GET" && tryServeStatic(pathname, response)) {
         return;
       }
 

@@ -3,11 +3,12 @@ import { createApp } from "./app.js";
 import { createDatabase } from "./database.js";
 
 const port = Number(process.env.PORT || 4000);
+const host = process.env.HOST || "0.0.0.0";
 const db = createDatabase();
 const server = createServer(createApp(db));
 
-server.listen(port, "127.0.0.1", () => {
-  console.info(`TaskFlow API listening on http://127.0.0.1:${port}`);
+server.listen(port, host, () => {
+  console.info(`TaskFlow listening on http://${host}:${port}`);
 });
 
 function shutdown() {
