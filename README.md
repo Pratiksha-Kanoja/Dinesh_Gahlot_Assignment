@@ -49,13 +49,15 @@ The database file is created automatically at `server/data/taskflow.sqlite` and 
 Create a **Web Service** from this repo and use:
 
 - **Root Directory:** leave empty
-- **Build Command:** `NPM_CONFIG_PRODUCTION=false npm install && npm run build`
+- **Build Command:** `npm ci --include=dev --include=optional && npm run build`
 - **Start Command:** `npm start`
 - **Environment variables (required):**
   - `NODE_VERSION` = `24` — without this, Render defaults to Node 20 and the build fails
   - `NPM_CONFIG_PRODUCTION` = `false`
+  - `NPM_CONFIG_OPTIONAL` = `true`
 
 There is also a `render.yaml` / `.node-version` in the repo. After changing env vars, trigger a **Manual Deploy**.
+If Render still reuses a failed dependency cache, use **Manual Deploy → Clear build cache & deploy**.
 
 The server serves the API and the built React app from one URL. SQLite data on the free tier can reset when the service restarts or redeploys.
 

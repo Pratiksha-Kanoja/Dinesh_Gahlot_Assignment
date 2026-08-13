@@ -3,10 +3,12 @@ services:
     name: taskflow
     runtime: node
     plan: free
-    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npm run build
+    buildCommand: npm ci --include=dev --include=optional && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
         value: "24"
       - key: NPM_CONFIG_PRODUCTION
         value: "false"
+      - key: NPM_CONFIG_OPTIONAL
+        value: "true"
