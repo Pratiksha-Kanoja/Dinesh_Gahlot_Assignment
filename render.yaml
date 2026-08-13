@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: taskflow
+    runtime: node
+    plan: free
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"

@@ -51,9 +51,11 @@ Create a **Web Service** from this repo and use:
 - **Root Directory:** leave empty
 - **Build Command:** `NPM_CONFIG_PRODUCTION=false npm install && npm run build`
 - **Start Command:** `npm start`
-- **Environment variables:**
-  - `NODE_VERSION` = `24`
+- **Environment variables (required):**
+  - `NODE_VERSION` = `24` — without this, Render defaults to Node 20 and the build fails
   - `NPM_CONFIG_PRODUCTION` = `false`
+
+There is also a `render.yaml` / `.node-version` in the repo. After changing env vars, trigger a **Manual Deploy**.
 
 The server serves the API and the built React app from one URL. SQLite data on the free tier can reset when the service restarts or redeploys.
 
